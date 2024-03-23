@@ -8,5 +8,3 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profil
 # Set path and source cargo environment variables
 source $HOME/.cargo/env
 
-# Generate Rustup completions for Bash
-rustup completions bash > ~/.local/share/bash-completion/completions/rustup
