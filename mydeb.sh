@@ -1,7 +1,5 @@
 #!/bin/bash
 
-
-
 sudo apt install -y xcb cmake gcc libgtk-3-dev ninja-build libgtkmm-3.0-dev libxcb-randr0 libxcb-randr0-dev 
 sudo apt install -y libxcb-util-dev libxcb-util0-dev libxcb-util1 libxcb-ewmh-dev libxcb-xinerama0 
 sudo apt install -y libxcb-xinerama0-dev libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-cursor-dev 
@@ -19,8 +17,8 @@ sudo apt install -y libasound2-dev libmpdclient-dev libiw-dev libcurl4-openssl-d
 sudo apt install -y libxcb-composite0-dev libuv1-dev libuv1 libjsoncpp-dev libxcb-randr0-dev wmctrl
 sudo systemctl enable avahi-daemon
 sudo apt install -y pipenv npm zip unzip zlib1g zlib1g-dev xz-utils tar python3-zipp dmraid libnvidia-cfg1-535 libnvidia-common-535 libnvidia-compute-535 gexec lolcat
-sudo apt install -y stacer sxhkd xclip ncmpc ncmpc-lyrics ncmpcpp osdlyrics lz4 jq autotools-dev
-sudo apt install -y automake pkgcong autoconf autoconf-arcive m4 font-manager fontconfig
+sudo apt install -y stacer sxhkd xclip ncmpc ncmpc-lyrics ncmpcpp osdlyrics lz4 jq autotools-dev fontconfig font-manager curl wget git
+sudo apt install -y automake pkgcong autoconf autoconf-arcive m4 font-manager fontconfig xcb
 sleep 2
 sudo systemctl enable acpid
 sleep 2
@@ -29,38 +27,29 @@ sudo apt install -y picom lxappearance
 sudo apt install -y jq inotify-tools polkit-gnome xdotool xclip ffmpeg
 sudo apt install -y brightnessctl feh maim scrot ncmpcpp
 sudo apt install -y mpv mpd mpc mpdris2 python3-mutagen  playerctl
-sudo add-apt-repository contrib non-free
+sudo add-apt-repository contrib non-free rofi dmenu compton
 sudo apt install -y ranger thunar thunar-archive-plugin thunar-volman file-roller
 sudo apt install -y xdg-user-dirs-gtk
 # Update Dirs
 xdg-user-dirs-update
-mkdir ~/.config/scripts
-mkdir ~/.config/autostart
-mkdir ~/.config/xresources
-mkdir ~/.fonts/
-mkdir ~/Git/
-mkdir ~/S-Shots/
-mkdir ~/Wallpaperss/
-mkdir ~/S-Recs/
 
 
 sudo apt install -y pulseaudio-module-bluetooth pulseaudio-equalizer pulseaudio-module-jack alsa-utils playerctl pipewire wireplumber pipewire-alsa pipewire-pulse pavucontrol volumeicon-alsa pamixer
 
 # Enable wireplumber
 sudo -u $username systemctl --user enable wireplumber.service
-
+sleep 2
 sudo apt install -y bluez blueman
 # Enable Bluetooth
 sudo systemctl enable bluetooth
-
-
+sleep 2
 sudo apt install -y xrdb lxappearance xvkbd
 sudo apt install -y materia-gtk-theme papirus-icon-theme
 sudo apt install -y fonts-font-awesome
 sudo apt install -y fonts-droid-fallback
 sudo apt install -y nala feh
 sudo apt install -y obs-studio mkvtoolnix-gui
-sudo apt install -y terminator rxvt-unicode urxvtd
+sudo apt install -y terminator rxvt-unicode urxvtd kitty
 sudo apt install -y numlockx figlet cpu-x udns-utils whois curl tree
 sudo apt install -y notepadqq geany geany-plugins cherrytree
 
