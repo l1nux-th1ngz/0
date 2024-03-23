@@ -22,12 +22,17 @@ sudo apt install -y automake pkgcong autoconf autoconf-arcive m4 font-manager fo
 sleep 2
 sudo systemctl enable acpid
 sleep 2
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile complete --default-toolchain nightly
+# Time to Set path
+echo "Rustup installation completed. Press Enter to continue..."
+read -r
+
 sudo apt-get install 'gtk2-engines*' --no-install-recommends
 sudo apt install -y picom lxappearance
 sudo apt install -y jq inotify-tools polkit-gnome xdotool xclip ffmpeg
-sudo apt install -y brightnessctl feh maim scrot ncmpcpp
+sudo apt install -y brightnessctl feh maim scrot ncmpcpp  rofi dmenu compton
 sudo apt install -y mpv mpd mpc mpdris2 python3-mutagen  playerctl
-sudo add-apt-repository contrib non-free rofi dmenu compton
+sudo add-apt-repository contrib non-free
 sudo apt install -y ranger thunar thunar-archive-plugin thunar-volman file-roller
 sudo apt install -y xdg-user-dirs-gtk
 # Update Dirs
@@ -50,6 +55,6 @@ sudo apt install -y fonts-droid-fallback
 sudo apt install -y nala feh
 sudo apt install -y obs-studio mkvtoolnix-gui
 sudo apt install -y terminator rxvt-unicode urxvtd kitty
-sudo apt install -y numlockx figlet cpu-x udns-utils whois curl tree
+sudo apt install -y numlockx figlet cpu-x udns-utils whois tree
 sudo apt install -y notepadqq geany geany-plugins cherrytree
 
