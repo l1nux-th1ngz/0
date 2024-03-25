@@ -1,14 +1,70 @@
-
-
-make this a shell scrpt
-
-
 #!/bin/bash
+
+git clone https://github.com/grm34/Hyprwwland "$HOME/.config/eww"
+	sudo apt-get install numix-blue-gtk-theme
+	
+  	   # Install Ruby
+    sudo apt install -y ruby-full
+
+    # Add rbenv to PATH and initialize rbenv
+	echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
+	echo 'eval "$(rbenv init -)"' >> ~/.bashrc
+	source ~/.bashrc
+
+	# Download and execute Rustup installer
+	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y --profile complete --default-toolchain nightly
+
+	# Set path and source cargo environment variables
+	echo 'export source "$HOME/.cargo/env"' >> ~/.bashrc
+ wait
 
 # 1st Display
 sudo apt install -y xorg xserver-xorg xbacklight xbindkeys xvkbd xinput
 sudo apt install -y gdebi synaptic udisks2 udiskie ja lxappearance
-sudo apt install -y xserver-xorg-input-all npm golang
+sudo apt install -y xserver-xorg-input-all npm golang curl wget
+
+#1
+sudo apt-get install -y xcb cmake gcc libgtk-3-dev ninja-build libgtkmm-3.0-dev libxcb-randr0 libxcb-randr0-dev libxcb-util-dev libxcb-util0-dev libxcb-util1 libxcb-ewmh-dev libxcb-xinerama0 libxcb-xinerama0-dev libxcb-icccm4-dev libxcb-keysyms1-dev libxcb-cursor-dev libxcb-shape0-dev build-essential
+
+#2
+sudo apt-get install -y libpango-1.0-0  librust-gdk-pixbuf-sys-dev libcairo2 libcairo-gobject2 libgio2.0-cil-dev software-properties-common libmpfr-dev libgmp3-dev libmpc-dev libgcc1 glibc-source
+
+#3
+sudo apt-get install -y libgl1-mesa-dev libpulse0 libpulse-dev libxext6 libxext-dev libxrender-dev libxcomposite-dev liblua5.3-dev liblua5.3 lua-lgi lua-filesystem libobs0 libobs-dev meson
+
+#4
+sudo apt-get install -y software-properties-common zlib1g-dev zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev  libreadline-dev  libffi-dev
+
+# Link all libraries
+sudo  ldconfig
+# 45
+
+
+
+
+sudo apt-get install -y nodejs
+sudo apt-get install -y golang
+sudo apt-get install -y python3
+sudo apt-get install -y npm
+sudo apt-get install -y python3-pip
+sudo apt-get install -y python3-pipx
+sudo apt-get install -y python3-tk
+sudo apt-get install -y wget
+sudo apt-get install -y curl
+sudo apt-get install -y git
+
+sudo apt-get install -y yad
+sudo apt-get install -y zenity
+sudo apt-get install -y 7zip
+sudo apt-get install -y a2ps
+sudo apt-get install -y adwaita-icon-theme-full
+sudo apt-get install -y alsa-firmware-loaders
+sudo apt-get install -y alsa-tools-gui
+sudo apt-get install -y alsa-utils
+sudo apt-get install -y alsamixergui
+sudo apt-get install -y bluefish
+sudo apt-get install -y sudo
+
 
 sudo apt update 
 
