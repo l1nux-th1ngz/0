@@ -21,7 +21,7 @@ sudo apt-get install -y spotify-client
 # Prepare Spotify for Spicetify
 echo "Before applying Spicetify, you need to gain write permission on Spotify files"
 sudo chmod a+wr /usr/share/spotify
-sudo chmod a+wr /usr/share/spotifyApps -R
+sudo chmod a+wr /usr/share/spotify/Apps -R
 
 # Install Spicetify CLI
 echo "Installing Spicetify CLI..."
