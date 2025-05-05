@@ -1,0 +1,103 @@
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status.
+set -e
+
+CLAMAV_VERSION="1.4.2"
+CLAMAV_ARCH="linux.x86_64"
+CLAMAV_DEB="clamav-${CLAMAV_VERSION}.${CLAMAV_ARCH}.deb"
+CLAMAV_SIG="${CLAMAV_DEB}.new_key.sig"
+CLAMAV_GPG_KEY_URL="https://www.clamav.net/downloads/production/clamav.gpg"
+DOWNLOAD_URL_BASE="https://www.clamav.net/downloads/production"
+
+echo "Updating package lists..."
+sudo apt-get update
+
+echo "Installing necessary dependencies (gnupg, wget)..."
+# Check if gnupg and wget are already installed
+if ! dpkg -s gnupg wget &> /dev/null; then
+    sudo apt-get -y install gnupg wget
+else
+    echo "gnupg and wget are already installed. Skipping installation."
+fi
+
+# --- GPG Key Handling and Verification ---
+
+echo "Downloading ClamAV GPG public key..."
+# Download the GPG key
+wget -O - "${CLAMAV_GPG_KEY_URL}" | sudo gpg --dearmor -o /usr/share/keyrings/clamav.gpg
+
+# Check if the key was downloaded successfully
+if [ ! -f "/usr/share/keyrings/clamav.gpg" ]; then
+    echo "Error: Failed to download ClamAV GPG key. Exiting."
+    exit 1
+fi
+
+echo "Downloading ClamAV package and signature..."
+wget "${DOWNLOAD_URL_BASE}/${CLAMAV_SIG}" -O "${CLAMAV_SIG}"
+wget "${DOWNLOAD_URL_BASE}/${CLAMAV_DEB}" -O "${CLAMAV_DEB}"
+
+# Check if download was successful
+if [ ! -f "${CLAMAV_SIG}" ] || [ ! -f "${CLAMAV_DEB}" ]; then
+    echo "Error: Download failed. Exiting."
+    exit 1
+fi
+
+echo "Verifying the downloaded package signature..."
+if gpg --no-default-keyring --keyring /usr/share/keyrings/clamav.gpg --verify "${CLAMAV_SIG}" "${CLAMAV_DEB}"; then
+    echo "Signature verification successful."
+else
+    echo "Error: Signature verification failed. The downloaded package may be compromised. Exiting."
+    # Clean up downloaded files on verification failure
+    rm -f "${CLAMAV_DEB}" "${CLAMAV_SIG}"
+    # Remove the GPG key as it might be problematic
+    sudo rm -f /usr/share/keyrings/clamav.gpg
+    exit 1
+fi
+
+# --- Installation ---
+
+echo "Installing ClamAV..."
+# Install
+if sudo dpkg -i "${CLAMAV_DEB}"; then
+    echo "ClamAV installed successfully using dpkg."
+else
+    echo "dpkg installation failed. Attempting to fix broken dependencies..."
+    # If dpkg fails, try to fix dependencies with apt-get install -f
+    if sudo apt install -f; then
+        echo "Dependencies fixed. Retrying installation..."
+        # Retry dpkg installation after fixing dependencies
+        if sudo dpkg -i "${CLAMAV_DEB}"; then
+            echo "ClamAV installed successfully after fixing dependencies."
+        else
+            echo "ClamAV installation failed even after fixing dependencies. Exiting."
+            # Clean up downloaded files on failure
+            rm -f "${CLAMAV_DEB}" "${CLAMAV_SIG}"
+            # Keep the GPG key in case it's needed for other things
+            exit 1
+        fi
+    else
+        echo "Failed to fix dependencies. ClamAV installation failed. Exiting."
+        # Clean up downloaded files on failure
+        rm -f "${CLAMAV_DEB}" "${CLAMAV_SIG}"
+        # Keep the GPG key in case it's needed for other things
+        exit 1
+    fi
+fi
+
+# Clean up downloaded files on success
+echo "Cleaning up downloaded files..."
+rm -f "${CLAMAV_DEB}" "${CLAMAV_SIG}"
+
+# --- Virus Definition Update ---
+
+echo "Updating ClamAV virus definitions..."
+if sudo freshclam; then
+    echo "ClamAV virus definition update completed successfully."
+else
+    echo "ClamAV virus definition update failed. Please check your internet connection and try again."
+    # Exit with a non-zero status to indicate the update failed
+    exit 1
+fi
+
+echo "ClamAV installation and definition update completed successfully."
