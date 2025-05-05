@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# Set to exit immediately if a command exits with a non-zero status.
+set -e
+
+# Function to check if a command exists
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+# Ensure necessary commands are installed
+required_commands=("wget" "gpg" "awk" "sudo" "apt-get" "tee")
+for cmd in "${required_commands[@]}"; do
+  if ! command_exists "$cmd"; then
+    echo "Error: Required command '$cmd' not found. Please install it first (e.g., sudo apt-get install $cmd)."
+    exit 1
+  fi
+done
+
+# Define URLs and file paths
+MOZILLA_KEY_URL="https://packages.mozilla.org/apt/repo-signing-key.gpg"
+MOZILLA_KEYRING_PATH="/usr/share/keyrings/packages.mozilla.org.gpg"
+MOZILLA_REPO_DEFINITION="deb [signed-by=${MOZILLA_KEYRING_PATH}] https://packages.mozilla.org/apt mozilla main"
+MOZILLA_REPO_FILE="/etc/apt/sources.list.d/mozilla.list"
+EXPECTED_FINGERPRINT="3574 F5CC 07D0 A65A 8742 FE6E C27B 41E7 11FCD1B4" # Replace with the current official fingerprint
+
+echo "--- Firefox Installation Script (from Mozilla APT) ---"
+
+# Download and install the Mozilla GPG key ---
+echo "--- Downloading and installing the Mozilla GPG key ---"
+
+# Check if the GPG key already exists and is the correct one (optional but good)
+# For simplicity, we'll just check if the file exists. More robust would be to check fingerprint.
+if [ -f "$MOZILLA_KEYRING_PATH" ]; then
+  echo "Mozilla GPG key already exists at $MOZILLA_KEYRING_PATH."
+  # Optional: Add fingerprint verification here if you want to be extra cautious on subsequent runs
+  # current_fingerprint=$(gpg --quiet --no-default-keyring --keyring "$MOZILLA_KEYRING_PATH" --fingerprint | awk '/pub/{getline; gsub(/^ +| +$/,""); print $0}')
+  # if [ "$current_fingerprint" != "$EXPECTED_FINGERPRINT" ]; then
+  #   echo "Warning: Existing GPG key fingerprint does not match the expected one!"
+  #   echo "Expected: $EXPECTED_FINGERPRINT"
+  #   echo "Found:    $current_fingerprint"
+  #   # You might want to remove the old key and download again here
+  # fi
+else
+  echo "Downloading and dearmoring the Mozilla GPG key from $MOZILLA_KEY_URL..."
+  if ! wget -q "${MOZILLA_KEY_URL}" -O- | gpg --dearmor | sudo tee "${MOZILLA_KEYRING_PATH}" > /dev/null; then
+    echo "Error: Failed to download or install the Mozilla GPG key."
+    exit 1
+  fi
+  echo "Mozilla GPG key installed successfully to $MOZILLA_KEYRING_PATH."
+fi
+
+#  Verify the fingerprint of the GPG key ---
+echo "--- Verifying the GPG key fingerprint ---"
+echo "Please verify the following fingerprint against the official Mozilla documentation:"
+gpg --quiet --no-default-keyring --keyring "${MOZILLA_KEYRING_PATH}" --fingerprint | awk '/pub/{getline; gsub(/^ +| +$/,""); print "\n"$0"\n"}'
+
+# Add the Mozilla repository ---
+echo "--- Adding the Mozilla repository ---"
+
+# Check if the repository file exists and contains the correct entry
+if [ -f "$MOZILLA_REPO_FILE" ] && grep -q "${MOZILLA_REPO_DEFINITION}" "$MOZILLA_REPO_FILE"; then
+  echo "Mozilla repository entry already exists in $MOZILLA_REPO_FILE."
+else
+  echo "Adding the Mozilla repository definition to $MOZILLA_REPO_FILE..."
+  if ! echo "${MOZILLA_REPO_DEFINITION}" | sudo tee -a "${MOZILLA_REPO_FILE}" > /dev/null; then
+    echo "Error: Failed to add the Mozilla repository definition."
+    exit 1
+  fi
+  echo "Mozilla repository added successfully."
+fi
+
+# Update package lists ---
+echo "--- Updating package lists ---"
+if ! sudo apt-get update; then
+  echo "Error: Failed to update package lists. Check your network connection and repository configurations."
+  exit 1
+fi
+echo "Package lists updated."
+
+# Install Firefox ---
+echo "--- Installing Firefox ---"
+
+# Check if Firefox is already installed from this repository
+# We can't easily check if it's from *this specific* repo without more complex apt querying.
+# A simple check for the package's presence is usually sufficient.
+if dpkg -s firefox &> /dev/null; then
+  echo "Firefox is already installed."
+  # Optional: Check if the installed version is the latest from the Mozilla repo
+  # latest_version=$(apt-cache policy firefox | awk '/packages.mozilla.org/{getline; gsub(/^ +| +$/,""); print $2}')
+  # installed_version=$(dpkg-query -W -f='${Version}' firefox)
+  # if [ "$installed_version" != "$latest_version" ]; then
+  #   echo "Installed version ($installed_version) is not the latest ($latest_version). You might want to run 'sudo apt-get upgrade firefox'."
+  # fi
+else
+  echo "Installing firefox package..."
+  if ! sudo apt-get -y install firefox; then
+    echo "Error: Failed to install firefox. Check the output above for details."
+    exit 1
+  fi
+  echo "Firefox installed successfully."
+fi
+
+echo "--- Installation Complete ---"
+echo "You should now have the latest version of Firefox from the official Mozilla APT repository."

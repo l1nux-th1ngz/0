@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# Download the install script
+echo "Downloading the install script..."
+wget https://github.com/drewgrif/bookworm-scripts/raw/main/install.sh
+
+# Check if the download was successful
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to download the install script. Exiting."
+    exit 1
+fi
+
+# Modify common_packages.txt
+echo "Modifying common_packages.txt..."
+COMMON_PACKAGES_FILE="bookworm-scripts/install_scripts/common_packages.txt"
+
+# Check if the file exists
+if [ ! -f "$COMMON_PACKAGES_FILE" ]; then
+    echo "Error: common_packages.txt not found at $COMMON_PACKAGES_FILE. Exiting."
+    exit 1
+fi
+
+# Remove specified packages
+echo "Removing packages from common_packages.txt..."
+sed -i '/^thunar$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^thunar-archive-plugin$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^thunar-volman$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^xfce4-power-manager$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^micro$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^geany-plugin-addons$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^geany-plugin-git-changebar$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^geany-plugin-spellcheck$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^geany-plugin-treebrowser$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^geany-plugin-markdown$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^geany-plugin-insertnum$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^geany-plugin-lineoperations$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^geany-plugin-automark$/d' "$COMMON_PACKAGES_FILE"
+sed -i '/^redshift$/d' "$COMMON_PACKAGES_FILE"
+
+# Add specified packages
+echo "Adding packages to common_packages.txt..."
+echo "gnome-power-manager" >> "$COMMON_PACKAGES_FILE"
+echo "geany-plugins" >> "$COMMON_PACKAGES_FILE"
+echo "bluefish" >> "$COMMON_PACKAGES_FILE"
+echo "bluefish-data" >> "$COMMON_PACKAGES_FILE"
+echo "bluefish-plugins" >> "$COMMON_PACKAGES_FILE"
+echo "gdebi" >> "$COMMON_PACKAGES_FILE"
+echo "synaptic" >> "$COMMON_PACKAGES_FILE"
+echo "nemo" >> "$COMMON_PACKAGES_FILE"
+
+# Modify vanilla_bspwm.sh
+echo "Modifying vanilla_bspwm.sh..."
+VANILLA_BSPWM_FILE="bookworm-scripts/install_scripts/vanilla_bspwm.sh"
+
+# Check if the file exists
+if [ ! -f "$VANILLA_BSPWM_FILE" ]; then
+    echo "Error: vanilla_bspwm.sh not found at $VANILLA_BSPWM_FILE. Exiting."
+    exit 1
+fi
+
+# Remove firefox-esr
+echo "Removing firefox-esr from vanilla_bspwm.sh..."
+sed -i '/firefox-esr/d' "$VANILLA_BSPWM_FILE"
+
+# Make the install script executable
+echo "Making install.sh executable..."
+chmod +x install.sh
+
+# Run the install script
+echo "Running the install script..."
+./install.sh
+
+# Remove the install script
+echo "Removing install.sh..."
+rm install.sh
+
+echo "Script finished."

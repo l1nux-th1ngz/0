@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Check if bspwm.png exists in the current directory
+if [ ! -f "bspwm.png" ]; then
+    echo "Error: bspwm.png not found in the current directory."
+    exit 1
+fi
+
+# Check if sudo is available
+if ! command_exists sudo; then
+    echo "Error: sudo is not installed. Please install it first."
+    exit 1
+fi
+
+# Move the image file
+echo "Moving bspwm.png to /usr/local/share/pixmaps..."
+if sudo mv bspwm.png /usr/local/share/pixmaps/; then
+    echo "bspwm.png moved successfully."
+else
+    echo "Error: Failed to move bspwm.png. Check permissions or if the directory exists."
+    exit 1
+fi
+
+# Update package lists
+echo "Updating package lists..."
+if sudo apt-get update; then
+    echo "Package lists updated successfully."
+else
+    echo "Error: Failed to update package lists. Check your internet connection or sources.list."
+    exit 1
+fi
+
+# Install necessary packages
+echo "Installing necessary packages..."
+# Using a single apt-get install command is more efficient
+if sudo apt-get -y install desktop-base desktop-file-utils lightdm slick-greeter lightdm-gtk-greeter lightdm-gtk-greeter-settings lightdm-settings; then
+    echo "Packages installed successfully."
+else
+    echo "Error: Failed to install one or more packages. Check the error messages above."
+    
+fi
+
+echo "Creating bspwm session file..."
+# Use proper quoting for the tee command to avoid potential issues
+if echo "[Desktop Entry]
+Name=bspwm
+Comment=Binary space partitioning window manager
+Exec=bspwm
+Type=Application" | sudo tee /usr/share/xsessions/bspwm.desktop > /dev/null; then
+    echo "/usr/share/xsessions/bspwm.desktop created successfully."
+else
+    echo "Error: Failed to create /usr/share/xsessions/bspwm.desktop. Check permissions."
+    exit 1
+fi
+
+echo "Configuring LightDM..."
+sudo mkdir -p /etc/lightdm/lightdm.conf.d/
+
+# Use proper quoting for the tee command
+if echo "[SeatDefaults]
+user-session=bspwm
+allow-manual-login=true
+greeter-show-manual-login=true
+allow-guest=true
+greeter-hide-users=false
+
+[Greeter]
+logo=/usr/local/share/pixmaps/bspwm.png" | sudo tee /etc/lightdm/lightdm.conf.d/90-custom.conf > /dev/null; then
+    echo "/etc/lightdm/lightdm.conf.d/90-custom.conf created successfully."
+else
+    echo "Error: Failed to create /etc/lightdm/lightdm.conf.d/90-custom.conf. Check permissions."
+    exit 1
+fi
+
+# Permissions for the session file should likely be read-only for others
+# Permissions for the conf file should likely be read-only for others and group
+echo "Setting permissions for session and configuration files..."
+sudo chmod 775 /usr/share/xsessions/bspwm.desktop
+sudo chmod 775 /etc/lightdm/lightdm.conf.d/90-custom.conf
+echo "Permissions set."
+
+echo "Starting and enabling LightDM service..."
+# Check if systemctl is available
+if command_exists systemctl; then
+    # Use separate commands for start and enable for clarity and better error handling
+    if sudo systemctl start lightdm.service; then
+        echo "LightDM service started."
+    else
+        echo "Warning: Failed to start LightDM service. You may need to start it manually or reboot."
+    fi
+
+    if sudo systemctl enable lightdm.service; then
+        echo "LightDM service enabled to start on boot."
+    else
+        echo "Warning: Failed to enable LightDM service. You may need to enable it manually."
+    fi
+else
+    echo "Warning: systemctl command not found. Cannot start or enable LightDM service automatically."
+    echo "You may need to start and enable LightDM manually using your system's service manager."
+fi
+
+echo "LightDM with bspwm setup complete. You may need to reboot for changes to fully take effect."

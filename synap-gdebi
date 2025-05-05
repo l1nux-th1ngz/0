@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status.
+set -e
+
+echo "Updating package list..."
+sudo apt-get update
+
+echo "Installing Synaptic and GDebi..."
+# Use -y for non-interactive installation
+# Use --no-install-recommends to avoid pulling in unnecessary dependencies
+sudo apt-get -y install synaptic gdebi --no-install-recommends
+
+echo "Creating/Updating Synaptic desktop entry..."
+# Use tee to write the desktop entry content with sudo
+sudo tee /usr/share/applications/synaptic.desktop > /dev/null <<EOF
+[Desktop Entry]
+Name=Synaptic Package Manager
+Comment=Graphical package manager for apt
+Exec=pkexec synaptic
+Icon=synaptic
+Terminal=false
+Type=Application
+Categories=System;PackageManager;
+EOF
+
+echo "Setting permissions for Synaptic desktop entry..."
+# Set permissions
+sudo chmod 755 /usr/share/applications/synaptic.desktop
+
+echo "Creating/Updating GDebi desktop entry..."
+
+sudo tee /usr/share/applications/gdebi.desktop > /dev/null <<EOF
+[Desktop Entry]
+Name=GDebi Package Installer
+Comment=Simple tool to install .deb files
+Exec=gdebi-gtk
+Icon=gdebi
+Terminal=false
+Type=Application
+Categories=System;PackageManager;
+EOF
+
+echo "Setting permissions for GDebi desktop..."
+# Set permissions
+sudo chmod 755 /usr/share/applications/gdebi.desktop
+
+echo "Updating desktop database..."
+sudo update-desktop-database
+
+# Check if the files exist before trying to change permissions
+if [ -f /usr/share/gdebi/gdebi ]; then
+  sudo chmod 755 /usr/share/gdebi/gdebi
+fi
+
+if [ -f /usr/share/gdebi/gdebi-gtk ]; then
+  sudo chmod 755 /usr/share/gdebi/gdebi-gtk
+fi
+
+if [ -f /usr/bin/synaptic-pkexec ]; then
+  sudo chmod 755 /usr/bin/synaptic-pkexec
+fi
+
+echo "Installation and configuration complete."

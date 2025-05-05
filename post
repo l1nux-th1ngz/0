@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Build GTK dirs
+echo "Updating GTK user directories..."
+if xdg-user-dirs-update; then
+  echo "xdg-user-dirs-update successful."
+else
+  echo "Error: xdg-user-dirs-update failed."
+fi
+
+if xdg-user-dirs-gtk-update; then
+  echo "xdg-user-dirs-gtk-update successful."
+else
+  echo "Error: xdg-user-dirs-gtk-update failed."
+fi
+
+
+# Enable services
+echo "Enabling system services..."
+if sudo systemctl enable bluetooth; then
+  echo "Bluetooth service enabled."
+else
+  echo "Error: Failed to enable Bluetooth service."
+fi
+
+if sudo systemctl enable avahi-daemon; then
+  echo "Avahi daemon enabled."
+else
+  echo "Error: Failed to enable Avahi daemon."
+fi
+
+if sudo systemctl enable acpid; then
+  echo "ACPI daemon enabled."
+else
+  echo "Error: Failed to enable ACPI daemon."
+fi
+
+echo "Script finished."
