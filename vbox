@@ -1,0 +1,71 @@
+#!/bin/bash
+set -e
+
+# Check for required commands
+for cmd in wget dpkg vboxmanage; do
+    if ! command -v $cmd &> /dev/null; then
+        echo "Error: $cmd is not installed. Please install it and try again."
+        exit 1
+    fi
+done
+
+# Set VirtualBox version
+VBOX_VERSION="${1:-7.1.8}"  # Default to 7.1.8 if no argument is provided
+
+# Update package lists
+echo "Updating package lists..."
+sudo apt-get update
+
+# Install necessary headers and dkms
+echo "Installing necessary headers and dkms..."
+sudo apt-get -y install linux-headers-$(uname -r) dkms
+
+# Check if VirtualBox is already installed
+if dpkg -l | grep -q virtualbox; then
+    echo "VirtualBox is already installed."
+    exit 0
+fi
+
+# Download VirtualBox package
+echo "Downloading VirtualBox package version $VBOX_VERSION..."
+wget "https://download.virtualbox.org/virtualbox/$VBOX_VERSION/virtualbox-${VBOX_VERSION}_${VBOX_VERSION}-168469~Debian~bookworm_amd64.deb"
+
+# Install VirtualBox package
+echo "Installing VirtualBox package..."
+sudo dpkg -i "virtualbox-${VBOX_VERSION}_${VBOX_VERSION}-168469~Debian~bookworm_amd64.deb"
+sudo apt-get -y --fix-broken install
+
+# Download VirtualBox Extension Pack
+echo "Downloading VirtualBox Extension Pack version $VBOX_VERSION..."
+wget "https://download.virtualbox.org/virtualbox/$VBOX_VERSION/Oracle_VirtualBox_Extension_Pack-${VBOX_VERSION}.vbox-extpack"
+
+# Install VirtualBox Extension Pack
+echo "Installing VirtualBox Extension Pack..."
+sudo vboxmanage extpack install "Oracle_VirtualBox_Extension_Pack-${VBOX_VERSION}.vbox-extpack"
+
+# Use the current user running the script
+VBOX_USER="$USER"
+
+# Validate if the user exists
+if ! id -u "$VBOX_USER" > /dev/null 2>&1; then
+    echo "Error: User '$VBOX_USER' does not exist."
+    exit 1
+fi
+
+# Add the specified user to the vboxusers group
+echo "Adding user '$VBOX_USER' to the 'vboxusers' group..."
+sudo usermod -a -G vboxusers "$VBOX_USER"
+
+# Install VirtualBox Guest Additions ISO
+echo "Installing virtualbox-guest-additions-iso..."
+sudo apt-get -y install virtualbox-guest-additions-iso
+
+# Clean up downloaded files
+echo "Cleaning up downloaded files..."
+rm -f "virtualbox-${VBOX_VERSION}_${VBOX_VERSION}-168469~Debian~bookworm_amd64.deb"
+rm -f "Oracle_VirtualBox_Extension_Pack-${VBOX_VERSION}.vbox-extpack"
+
+# Completion message
+echo "VirtualBox installation complete."
+echo "Please log out and log back in (or reboot) for the user '$VBOX_USER' to be able to use VirtualBox."
+echo "You can verify the installation by running 'vboxmanage --version'."
