@@ -1,9 +1,0 @@
-#!/bin/bash
-
-# Install the required packages
-sudo apt-get -y install lightdm-gtk-greeter lightdm-gtk-greeter-settings lightdm-settings
-
-# Enable the LightDM GTK greeter to start on boot
-sudo systemctl enable lightdm-gtk-greeter
-
-echo "Installation and enabling completed."
